@@ -26,18 +26,27 @@ vector <Gift> gift_store;
 
 ifstream& operator>> (ifstream& input, Gift& gift)
 {
+    //pre:
+    assert(input.is_open());
+    //post: the gift is read correctly
     input >> gift.price;
     getline(input,gift.id) ;
     gift.id.erase(0,1);
 }
 ostream& operator<< (ostream& output, Gift& gift)
 {
+    //pre:
+    assert(true);
+    //post: formats the output.
     output << "Price: " << gift.price << "\n"
            << "Id: " << gift.id << endl ;
 }
 
 ifstream& operator>> (ifstream& input, Person& person)
 {
+    //pre:
+    assert(input.is_open());
+    //post: read the wishlist of a person
     Gift temp;
 
     input >> person.budget;
@@ -45,7 +54,7 @@ ifstream& operator>> (ifstream& input, Person& person)
     while (!input.eof())
     {
         getline(input,temp.id) ;
-        temp.price = 0;
+        temp.price = 0 ;
         person.wishlist.push_back(temp);
     }
 
@@ -57,55 +66,85 @@ struct Attempt
     vector <Gift> present_list;
     int tot_spent;
 };
+bool operator<< (Attempt& first, Attempt& second)
+{
+    //pre:
+    assert(true);
+    //post: return true if the first expense is less than the second one.
+    return (first.tot_spent < second.tot_spent);
+}
 bool sub(Attempt& best, Attempt& solution)
 {
+    //pre:
+    assert(true);
+    //post: substitute values in best with the one in solution.
+    Gift temp;
     best.n_of_items = solution.n_of_items;
     best.tot_spent = solution.tot_spent;
     for (int i = 0 ; i < solution.present_list.size(); i++)
-      best.present_list.push_back(solution.present_list[i]);
-
-}
-
-Attempt solution;
-Attempt best;
-
-int p = 0 ;
-
-int gifts (vector <Gift>& wishlist, int budget,int g)
-{
-    if (g == wishlist.size()-1)
-      return 1;
-
-   if (budget == 0)
-   {
-       sub(best,solution);
-       return 1;
-   }
-
-   if (wishlist[g].price <= budget)
-   {
-       solution.present_list[p].id = wishlist[g].id ;
-       p++;
-       solution.n_of_items ++;
-       solution.tot_spent += wishlist[g].price ;
-       return gifts(wishlist,budget - wishlist[g].price, g+1);
-   }
-
-    if (wishlist[g].price > budget)
     {
-        return gifts(wishlist,budget,g+1);
+         best.present_list.push_back(temp);
+        best.present_list[i] = solution.present_list[i];
     }
 
 
+}
 
+Attempt best;
+
+void gifts (vector <Gift> wishlist, int budget,int i)
+{
+    //pre:
+    assert(budget>0);
+    //post: the function computes the highest budget lists of item in the person wish list.
+    Attempt solution;
+    solution.n_of_items = 0;
+    solution.tot_spent = 0;
+    int p = 0 ;
+    int j = i;
+
+
+    if (i < wishlist.size())
+    {
+    while ((budget - solution.tot_spent) >= 0)
+    {
+        if (j == wishlist.size())
+        {
+            if (best << solution)
+              sub(best,solution);
+            if (i < wishlist.size())
+              return gifts(wishlist,budget,i+1);
+            else
+                break;
+        }
+
+        if (wishlist[j].price + solution.tot_spent <= budget )
+        {
+            Gift temp;
+            solution.present_list.push_back(temp);
+
+            solution.present_list[p].id = wishlist[j].id;
+            solution.tot_spent = solution.tot_spent + wishlist[j].price;
+            solution.n_of_items++;
+            p++;
+            j++;
+        }else
+            j++;
+
+     }
+    }
 }
 
 int main()
 {
+    //pre:
+    assert(true);
+    //post: read the giftshop file and wish lists, then it calls the function gifts and print the best solution found.
+
     ifstream input;
     Gift temp;
-    Person andrew;
-    Person belle;
+    Person andrew, belle, chris, desiree, edward, fabienne;
+
     andrew.name = "Andrew";
     belle.name = "Belle";
 
@@ -117,12 +156,9 @@ int main()
         gift_store.push_back(temp);
     }
 
-    cout << "GIFTSTORE: " << endl;
 
-    for (int i = 0 ; i < gift_store.size()-1; i++)
-    {
-        cout << gift_store[i];
-    }
+    //change all the andrew here to the name you wish to inspect
+    //SORRY FOR THE USER-UNFRIENDLY IMPLEMENTATION OF THE READING BUT WE HAD NO TIME LEFT!
 
     input.close();
 
@@ -132,9 +168,7 @@ int main()
 
     input.close();
 
-    input.open("Belle.txt");
 
-    input >> belle;
 
     for (int i = 0 ; i < andrew.wishlist.size() ;i++)
     {
@@ -146,43 +180,17 @@ int main()
         }
     }
 
-    for (int i = 0 ; i < belle.wishlist.size() ;i++)
-    {
-        for (int j = 0 ; j < gift_store.size();j++)
-        {
-            if (belle.wishlist[i].id == gift_store[j].id)
-               belle.wishlist[i].price = gift_store[j].price;
-
-        }
-    }
-    cout << endl ;
-    cout << endl ;
-
-    cout << andrew.name << endl;
-    cout << endl ;
-    cout << "Budget: " << andrew.budget << endl ;
-    cout << endl ;
-    for (int i = 0 ; i < andrew.wishlist.size()-1; i++)
-    {
-        cout << andrew.wishlist[i] << endl ;
-    }
-
-    cout << belle.name <<endl;
-    cout << endl ;
-    cout << "Budget: " << belle.budget << endl ;
-    cout << endl ;
-
-    for (int i = 0 ; i < belle.wishlist.size()-1; i++)
-    {
-        cout << belle.wishlist[i] << endl ;
-    }
-
     gifts(andrew.wishlist,andrew.budget,0);
-    /*
-    for (int i = 0 ; i < solution.present_list.size()-1; i++)
+
+
+    cout << "OPTIMAL WISH LIST:"<<endl;
+    for (int i = 0 ; i < best.n_of_items; i++)
     {
-        cout << solution.present_list[i] << endl ;
+        cout << best.present_list[i].id << endl ;
     }
-*/
+    cout << "spent: ";
+    cout << best.tot_spent;
+
+
     return 0;
 }
