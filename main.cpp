@@ -21,7 +21,6 @@ struct Person
     int budget;
 };
 
-
 vector <Gift> gift_store;
 
 ifstream& operator>> (ifstream& input, Gift& gift)
@@ -66,6 +65,7 @@ struct Attempt
     vector <Gift> present_list;
     int tot_spent;
 };
+
 bool operator<< (Attempt& first, Attempt& second)
 {
     //pre:
@@ -142,11 +142,10 @@ int main()
     //post: read the giftshop file and wish lists, then it calls the function gifts and print the best solution found.
 
     ifstream input;
+    string name;
+    string file_name;
     Gift temp;
-    Person andrew, belle, chris, desiree, edward, fabienne;
-
-    andrew.name = "Andrew";
-    belle.name = "Belle";
+    Person p;
 
     input.open("giftstore.txt");
 
@@ -156,41 +155,45 @@ int main()
         gift_store.push_back(temp);
     }
 
+    cout << "Gift-shop loaded!" << endl;
+    input.close();
 
-    //change all the andrew here to the name you wish to inspect
-    //SORRY FOR THE USER-UNFRIENDLY IMPLEMENTATION OF THE READING BUT WE HAD NO TIME LEFT!
+    cout << "Insert wishlist: ";
+    getline(cin,file_name);
+    cout << endl;
+    int pos = file_name.find('.');
+    name = file_name;
+    name.erase(pos, name.size());
+
+    input.open(file_name.c_str());
+
+    if (input.is_open())
+        cout << "Whislist loaded correctly!" << endl ;
+
+    input >> p;
+    p.name = name;
 
     input.close();
 
-    input.open("Andrew.txt");
-
-    input >> andrew;
-
-    input.close();
-
-
-
-    for (int i = 0 ; i < andrew.wishlist.size() ;i++)
+    for (int i = 0 ; i < p.wishlist.size() ;i++)
     {
         for (int j = 0 ; j < gift_store.size();j++)
         {
-            if (andrew.wishlist[i].id == gift_store[j].id)
-               andrew.wishlist[i].price = gift_store[j].price;
+            if (p.wishlist[i].id == gift_store[j].id)
+               p.wishlist[i].price = gift_store[j].price;
 
         }
     }
 
-    gifts(andrew.wishlist,andrew.budget,0);
-
+    gifts(p.wishlist,p.budget,0);
 
     cout << "OPTIMAL WISH LIST:"<<endl;
     for (int i = 0 ; i < best.n_of_items; i++)
     {
         cout << best.present_list[i].id << endl ;
     }
-    cout << "spent: ";
-    cout << best.tot_spent;
-
+    cout << "Spent: " << best.tot_spent << " out of " << p.budget << endl;
+    cout << "That means we spent "  << (double)best.tot_spent/(double)p.budget*100 << "% of the budget" << endl ;
 
     return 0;
 }
